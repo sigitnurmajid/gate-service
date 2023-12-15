@@ -1,4 +1,4 @@
-package runner
+package service
 
 import (
 	"sync"
@@ -30,4 +30,11 @@ func (s *SessionStore) Get(key string) (string, bool) {
 	defer s.mu.RUnlock()
 	val, ok := s.sessions[key]
 	return val, ok
+}
+
+// Delete removes a session from the session store
+func (s *SessionStore) Del(key string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.sessions, key)
 }

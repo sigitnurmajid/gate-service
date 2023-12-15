@@ -11,6 +11,7 @@ type Server struct {
 	ln         net.Listener
 	quitch     chan struct{}
 	Msgch      chan Message
+	session    *SessionStore
 }
 
 type Message struct {
@@ -18,11 +19,12 @@ type Message struct {
 	Payload []byte
 }
 
-func NewTcpServer(listenAddr string) *Server {
+func NewTcpServer(listenAddr string, session *SessionStore) *Server {
 	return &Server{
 		listenAddr: listenAddr,
 		quitch:     make(chan struct{}),
 		Msgch:      make(chan Message, 20),
+		session:    session,
 	}
 }
 
@@ -56,6 +58,7 @@ func (s *Server) acceptLoop() {
 }
 
 func (s *Server) readLoop(conn net.Conn) {
+	defer s.session.Del(conn.RemoteAddr().String())
 	defer conn.Close()
 
 	for {

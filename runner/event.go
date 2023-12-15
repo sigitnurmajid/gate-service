@@ -12,10 +12,10 @@ import (
 type Event struct {
 	api     *zoo.ZooService
 	msg     service.Message
-	session *SessionStore
+	session *service.SessionStore
 }
 
-func CreateEvent(api *zoo.ZooService, msg service.Message, session *SessionStore) *Event {
+func CreateEvent(api *zoo.ZooService, msg service.Message, session *service.SessionStore) *Event {
 	return &Event{
 		api:     api,
 		msg:     msg,
@@ -74,11 +74,21 @@ func (r *Event) onEventCardHandler() {
 		fmt.Println("session get error")
 	}
 
+	var state string
+	switch r.msg.Payload[18] {
+	case 1:
+		state = "IN"
+	case 2:
+		state = "OUT"
+	default:
+		state = "Invalid"
+	}
+
 	// Webhook function here
 	resp, err := r.api.PostGateAuth(zoo.PostGateAuthBody{
 		ID:        serial,
 		NFCID:     cardstr,
-		Direction: "OUT",
+		Direction: state,
 	})
 	if err != nil {
 		fmt.Println("Post auth get error:", err)

@@ -28,14 +28,14 @@ func Run(ctx context.Context, configPath string) {
 		panic(err)
 	}
 
+	log.Println("Create Session Memory")
+	session := service.NewSessionStore()
+
 	log.Println("Build TCP Server")
-	server := service.NewTcpServer(conf.Port)
+	server := service.NewTcpServer(conf.Port, session)
 
 	log.Println("Create Zoo API")
 	api := zoo.CreateZooApi(conf.ZooApi)
-
-	log.Println("Create Session Memory")
-	session := NewSessionStore()
 
 	go func() {
 		for msg := range server.Msgch {
